@@ -1,0 +1,52 @@
+plugins {
+    id 'org.jetbrains.kotlin.jvm' version '2.1.10'
+}
+
+group = 'net.shotakosaka.wormquant'
+version = '1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+    maven {
+        url 'https://maven.scijava.org/content/repositories/public/'
+    }
+}
+
+dependencies {
+    implementation 'net.imagej:ij:1.54f'
+
+    testImplementation 'org.jetbrains.kotlin:kotlin-test'
+}
+
+test {
+    useJUnitPlatform()
+}
+
+kotlin {
+    jvmToolchain(8)
+}
+
+// 1. コード変更後、一発で ImageJ と WormQuant を起動してテストするタスク
+task runPlugin(type: JavaExec) {
+    group = 'verification'
+    description = 'Launches ImageJ directly with WormQuant for quick testing'
+    classpath = sourceSets.test.runtimeClasspath
+    mainClass = 'net.shotakosaka.wormquant.WormQuantLauncher'
+}
+
+// 2. ビルドした jar を Fiji.app/plugins/ に自動コピーするタスク
+task copyToFiji(type: Copy) {
+    group = 'fiji'
+    description = 'Builds jar and copies it into Fiji.app plugins directory'
+    dependsOn jar
+    from jar.archiveFile
+    into "${project.findProperty('fiji.dir') ?: '/Applications/Fiji.app'}/plugins"
+}
+
+// 3. jar をビルド・コピーして Fiji アプリ本体を直接起動するタスク
+task runFiji(type: Exec) {
+    group = 'fiji'
+    description = 'Builds jar, copies it to Fiji plugins, and launches Fiji'
+    dependsOn copyToFiji
+    commandLine 'open', '-a', project.findProperty('fiji.dir') ?: '/Applications/Fiji.app'
+}
