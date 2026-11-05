@@ -106,7 +106,7 @@ class ImageQuantifier(
                     }
 
                     matchedCount++
-                    IJ.log("[$currentNum/$total] Analysed: ${file.name} (Mean: ${measurement.mean}, Area: ${measurement.area})")
+                    IJ.log("[$currentNum/$total] Analysed: ${file.name} (Mean: ${measurement.mean}, Area: ${measurement.area}, RawIntDen: ${measurement.rawIntDen})")
                 }
             }
         } finally {
